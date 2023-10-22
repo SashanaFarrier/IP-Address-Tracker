@@ -12,10 +12,17 @@ const ISPEl = document.createElement("p")
 
 // Geolocation API Key
 const api_key = "at_dSydHKPdTPOcKTla2pKMl6ALSBQV4"
+
 const URL = `https://geo.ipify.org/api/v2/country,city?`
 
-// var map = L.map('map').fitWorld();
-var map = L.map('map');
+// get user current location
+const Userlocation = navigator.geolocation.getCurrentPosition(showPosition)
+
+//get user's IP address on the map on the initial page load
+    getIpAddress();
+
+// get user input from search bar
+getInput()
 
 function showPosition(position) {
     const lat = position.coords.latitude
@@ -23,16 +30,16 @@ function showPosition(position) {
 
     if(lat != undefined && lng != undefined) {
         map.setView([lat, lng], 16);
+        L.marker([lat, lng], {icon: myIcon}).addTo(map)
     } else {
         map.setView([18.1096, 77.2975], 16);
     }
-  
 }
 
-// get user current location
-navigator.geolocation.getCurrentPosition(showPosition)
-
- var myIcon = L.icon({
+//Leaflet map
+//let map = L.map('map').fitWorld();
+let map = L.map('map');
+let myIcon = L.icon({
     iconUrl: './images/icon-location.svg',
     iconSize: [60, 70],
     iconAnchor: [22, 94],
@@ -40,31 +47,27 @@ navigator.geolocation.getCurrentPosition(showPosition)
     shadowUrl: './images/icon-location-shadow.svg',
     shadowSize: [70, 70],
     shadowAnchor: [22, 94]
-});
+    });
+    
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+    
+    function onLocationFound(e) {
+        var radius = e.accuracy;
+        L.marker(e.latlng, {icon: myIcon}).addTo(map)
+    }
+    
+    map.on('locationfound', onLocationFound);
+    
+    function onLocationError(e) {
+        alert(e.message);
+    }
+    
+    map.on('locationerror', onLocationError);      
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap'
-}).addTo(map);
 
-// map.locate({setView: true, watch: true})
-// map.locate({setView: true, maxZoom: 16});
-
-function onLocationFound(e) {
-    var radius = e.accuracy;
-    L.marker(e.latlng, {icon: myIcon}).addTo(map)
-}
-
-map.on('locationfound', onLocationFound);
-
-function onLocationError(e) {
-    alert(e.message);
-}
-
-map.on('locationerror', onLocationError);   
-
-// get user input from search bar
-getInput()
 function getInput() {
     searchBtn.addEventListener("click", () => {
     let value, type, ip, domain;
@@ -99,10 +102,10 @@ function getInput() {
 
         } 
     
-        if(isIpValid !== false || isDomainValid !== false) {
-            boxOverlay.classList.remove("d-none")
-            boxOverlay.classList.add("d-flex")
-        }
+        // if(isIpValid !== false || isDomainValid !== false) {
+        //     boxOverlay.classList.remove("d-none")
+        //     boxOverlay.classList.add("d-flex")
+        // }
     })
 
 }
